@@ -60,7 +60,7 @@ class SystemDetector
     public function getPhpBinaryPath(string $version): string
     {
         $os = $this->getOperatingSystem();
-        
+
         if ($this->isRhelBased()) {
             $paths = [
                 "/opt/cpanel/ea-php{$version}/bin/php",
@@ -208,11 +208,11 @@ class SystemDetector
         // Try to read /etc/os-release
         if (file_exists('/etc/os-release')) {
             $osRelease = parse_ini_file('/etc/os-release');
-            
+
             if (isset($osRelease['NAME'])) {
                 $systemInfo['os'] = $osRelease['NAME'];
             }
-            
+
             if (isset($osRelease['VERSION_ID'])) {
                 $systemInfo['version'] = $osRelease['VERSION_ID'];
             }
@@ -276,13 +276,13 @@ class SystemDetector
             case 'Rocky Linux':
             case 'CloudLinux':
                 return $majorVersion >= 9;
-            
+
             case 'Ubuntu':
                 return $majorVersion >= 22;
-            
+
             case 'Debian':
                 return $majorVersion >= 12;
-            
+
             default:
                 return false;
         }
@@ -303,7 +303,7 @@ class SystemDetector
     {
         $meminfo = file_get_contents('/proc/meminfo');
         preg_match('/MemTotal:\s+(\d+)\s+kB/', $meminfo, $matches);
-        
+
         return [
             'total' => isset($matches[1]) ? (int)$matches[1] * 1024 : 0,
             'formatted' => isset($matches[1]) ? round($matches[1] / 1024 / 1024, 2) . ' GB' : 'Unknown'
@@ -331,14 +331,14 @@ class SystemDetector
     {
         if ($this->isRhelBased()) {
             return [
-                'curl', 'wget', 'unzip', 'tar', 'systemd', 'which', 'git', 
-                'epel-release', 'php', 'php-cli', 'php-json', 'php-curl', 
+                'curl', 'wget', 'unzip', 'tar', 'systemd', 'which', 'git',
+                'epel-release', 'php', 'php-cli', 'php-json', 'php-curl',
                 'php-mbstring', 'php-xml', 'php-zip'
             ];
         } elseif ($this->isDebianBased()) {
             return [
-                'curl', 'wget', 'unzip', 'tar', 'systemd', 'which', 'git', 
-                'software-properties-common', 'php', 'php-cli', 'php-json', 
+                'curl', 'wget', 'unzip', 'tar', 'systemd', 'which', 'git',
+                'software-properties-common', 'php', 'php-cli', 'php-json',
                 'php-curl', 'php-mbstring', 'php-xml', 'php-zip'
             ];
         }
@@ -365,7 +365,7 @@ class SystemDetector
     public function getPhpPaths(): array
     {
         $paths = [];
-        
+
         if ($this->isRhelBased()) {
             $paths = [
                 '/opt/cpanel/ea-php81/bin/php',
@@ -380,7 +380,7 @@ class SystemDetector
         } else {
             $paths = [
                 '/usr/bin/php8.1',
-                '/usr/bin/php8.2', 
+                '/usr/bin/php8.2',
                 '/usr/bin/php8.3',
                 '/usr/local/bin/php8.1',
                 '/usr/local/bin/php8.2',

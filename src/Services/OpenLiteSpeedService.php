@@ -33,7 +33,7 @@ class OpenLiteSpeedService
     public function start(): bool
     {
         $this->logger->info('Starting OpenLiteSpeed');
-        
+
         $result = shell_exec('systemctl start lshttpd 2>&1');
         $exitCode = shell_exec('echo $?');
 
@@ -52,7 +52,7 @@ class OpenLiteSpeedService
     public function stop(): bool
     {
         $this->logger->info('Stopping OpenLiteSpeed');
-        
+
         $result = shell_exec('systemctl stop lshttpd 2>&1');
         $exitCode = shell_exec('echo $?');
 
@@ -71,7 +71,7 @@ class OpenLiteSpeedService
     public function restart(): bool
     {
         $this->logger->info('Restarting OpenLiteSpeed');
-        
+
         $result = shell_exec('systemctl restart lshttpd 2>&1');
         $exitCode = shell_exec('echo $?');
 
@@ -90,7 +90,7 @@ class OpenLiteSpeedService
     public function reload(): bool
     {
         $this->logger->info('Reloading OpenLiteSpeed configuration');
-        
+
         $result = shell_exec('systemctl reload lshttpd 2>&1');
         $exitCode = shell_exec('echo $?');
 
@@ -127,7 +127,6 @@ class OpenLiteSpeedService
             ]);
 
             return true;
-
         } catch (\Exception $e) {
             $this->logger->error('Failed to generate OpenLiteSpeed configuration', [
                 'error' => $e->getMessage()
@@ -165,7 +164,7 @@ class OpenLiteSpeedService
     private function generateErrorLogConfig(): string
     {
         $loggingConfig = $this->config->getLoggingConfig();
-        
+
         $config = "errorlog logs/error.log {\n";
         $config .= "    logLevel {$loggingConfig['level']}\n";
         $config .= "    rollingSize {$loggingConfig['max_log_size_mb']}M\n";
@@ -178,7 +177,7 @@ class OpenLiteSpeedService
     private function generateAccessLogConfig(): string
     {
         $loggingConfig = $this->config->getLoggingConfig();
-        
+
         $config = "accessLog logs/access.log {\n";
         $config .= "    rollingSize {$loggingConfig['max_log_size_mb']}M\n";
         $config .= "    keepDays {$loggingConfig['retention_days']}\n";
@@ -329,7 +328,7 @@ class OpenLiteSpeedService
         $xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
         $xml .= "<virtualHost>\n";
         $xml .= "    <hostName>{$domain}</hostName>\n";
-        
+
         if (isset($domainData['subdomains'])) {
             foreach ($domainData['subdomains'] as $subdomain) {
                 $xml .= "    <hostName>{$subdomain['domain']}</hostName>\n";
@@ -396,7 +395,7 @@ class OpenLiteSpeedService
     private function generatePhpHandler(string $version): string
     {
         $phpBinary = $this->getPhpBinary($version);
-        
+
         $config = "extprocessor lsapi{$version} {\n";
         $config .= "    type lsapi\n";
         $config .= "    address uds://tmp/lshttpd/lsapi{$version}.sock\n";

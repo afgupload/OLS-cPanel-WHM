@@ -49,7 +49,6 @@ class DomainService
             ]);
 
             return $domains;
-
         } catch (\Exception $e) {
             $this->logger->error('Failed to retrieve domains', [
                 'error' => $e->getMessage()
@@ -79,7 +78,7 @@ class DomainService
 
             if (isset($result['data']['cert'])) {
                 $certData = $result['data']['cert'];
-                
+
                 return new SslCertificate([
                     'domain' => $domain,
                     'certificate' => $certData['certificate'] ?? '',
@@ -93,7 +92,6 @@ class DomainService
             }
 
             return null;
-
         } catch (\Exception $e) {
             $this->logger->warning('Failed to get SSL info for domain', [
                 'domain' => $domain,
@@ -116,7 +114,6 @@ class DomainService
             }
 
             return $this->config->get('php.default_version', '8.1');
-
         } catch (\Exception $e) {
             $this->logger->warning('Failed to get PHP version for domain', [
                 'domain' => $domain,
@@ -147,7 +144,6 @@ class DomainService
             }
 
             return $subdomains;
-
         } catch (\Exception $e) {
             $this->logger->error('Failed to get subdomains', [
                 'main_domain' => $mainDomain,
@@ -177,7 +173,6 @@ class DomainService
             }
 
             return $addonDomains;
-
         } catch (\Exception $e) {
             $this->logger->error('Failed to get addon domains', [
                 'username' => $username,
@@ -207,7 +202,6 @@ class DomainService
             }
 
             return $parkedDomains;
-
         } catch (\Exception $e) {
             $this->logger->error('Failed to get parked domains', [
                 'username' => $username,
@@ -230,7 +224,6 @@ class DomainService
             }
 
             return "/home/{$this->getDomainUser($domain)}/public_html";
-
         } catch (\Exception $e) {
             $this->logger->warning('Failed to get document root for domain', [
                 'domain' => $domain,
@@ -334,7 +327,7 @@ class DomainService
     private function executeWhmApi(string $function, array $params = []): array
     {
         $command = 'whmapi1 ' . $function;
-        
+
         foreach ($params as $key => $value) {
             if (is_bool($value)) {
                 $value = $value ? '1' : '0';
@@ -362,13 +355,13 @@ class DomainService
     public function refreshDomainCache(): void
     {
         $this->logger->info('Refreshing domain cache');
-        
+
         try {
             $this->executeWhmApi('setup_user_session', [
                 'api.version' => 1,
                 'user' => 'root'
             ]);
-            
+
             $this->logger->info('Domain cache refreshed successfully');
         } catch (\Exception $e) {
             $this->logger->error('Failed to refresh domain cache', [

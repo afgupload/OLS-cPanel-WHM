@@ -39,7 +39,6 @@ class ConfigManager
             $this->logger->info('Configuration loaded successfully', [
                 'file' => $this->configFile
             ]);
-
         } catch (\Exception $e) {
             $this->logger->error('Failed to load configuration', [
                 'error' => $e->getMessage(),
@@ -53,7 +52,7 @@ class ConfigManager
     {
         try {
             $yaml = Yaml::dump($this->config, 4, 2);
-            
+
             if (!file_put_contents($this->configFile, $yaml)) {
                 throw new \RuntimeException("Failed to write config file: {$this->configFile}");
             }
@@ -64,7 +63,6 @@ class ConfigManager
             ]);
 
             return true;
-
         } catch (\Exception $e) {
             $this->logger->error('Failed to save configuration', [
                 'error' => $e->getMessage(),
@@ -293,7 +291,7 @@ class ConfigManager
     public function getConfigTemplate(string $template): array
     {
         $templateFile = $this->configDir . '/templates/' . $template . '.yaml';
-        
+
         if (!file_exists($templateFile)) {
             throw new InvalidArgumentException("Template not found: {$template}");
         }
@@ -305,7 +303,7 @@ class ConfigManager
     {
         $templateConfig = $this->getConfigTemplate($template);
         $this->config = array_merge_recursive($this->config, $templateConfig, $overrides);
-        
+
         return $this->saveConfig();
     }
 }

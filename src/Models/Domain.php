@@ -186,7 +186,7 @@ class Domain implements JsonSerializable
 
     public function isMainDomain(): bool
     {
-        return !str_contains($this->domain, '.') || 
+        return !str_contains($this->domain, '.') ||
                count(explode('.', $this->domain)) === 2;
     }
 
@@ -232,7 +232,7 @@ class Domain implements JsonSerializable
 
     public function equals(Domain $other): bool
     {
-        return $this->domain === $other->getDomain() && 
+        return $this->domain === $other->getDomain() &&
                $this->user === $other->getUser();
     }
 
@@ -314,7 +314,7 @@ class Domain implements JsonSerializable
     {
         $type = $this->getDomainType();
         $prefix = '';
-        
+
         switch ($type) {
             case 'main':
                 $prefix = '🏠 ';

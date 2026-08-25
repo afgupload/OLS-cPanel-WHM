@@ -21,12 +21,12 @@ class SystemService
     public function installPackage(string $package): bool
     {
         $command = $this->systemDetector->getInstallCommand($package);
-        
+
         $this->logger->info("Installing package: {$package}");
-        
+
         $output = shell_exec($command . ' 2>&1');
         $exitCode = shell_exec('echo $?');
-        
+
         if (trim($exitCode) === '0') {
             $this->logger->info("Package {$package} installed successfully");
             return true;
@@ -43,18 +43,18 @@ class SystemService
     public function installPackages(array $packages): array
     {
         $results = [];
-        
+
         foreach ($packages as $package) {
             $results[$package] = $this->installPackage($package);
         }
-        
+
         return $results;
     }
 
     public function updateSystem(): bool
     {
         $this->logger->info('Updating system packages');
-        
+
         if ($this->systemDetector->isRhelBased()) {
             $command = 'dnf update -y';
         } elseif ($this->systemDetector->isDebianBased()) {
@@ -63,10 +63,10 @@ class SystemService
             $this->logger->error('Unsupported operating system for package update');
             return false;
         }
-        
+
         $output = shell_exec($command . ' 2>&1');
         $exitCode = shell_exec('echo $?');
-        
+
         if (trim($exitCode) === '0') {
             $this->logger->info('System updated successfully');
             return true;
@@ -83,12 +83,12 @@ class SystemService
     public function manageService(string $service, string $action): bool
     {
         $command = $this->systemDetector->getServiceCommand($service, $action);
-        
+
         $this->logger->info("Managing service: {$action} {$service}");
-        
+
         $output = shell_exec($command . ' 2>&1');
         $exitCode = shell_exec('echo $?');
-        
+
         if (trim($exitCode) === '0') {
             $this->logger->info("Service {$service} {$action} successful");
             return true;
@@ -105,17 +105,17 @@ class SystemService
     public function stopApache(): bool
     {
         $serviceName = $this->systemDetector->getApacheServiceName();
-        
+
         // Try to stop both possible service names
         $services = ['httpd', 'apache2', $serviceName];
-        
+
         foreach ($services as $service) {
             if ($this->isServiceRunning($service)) {
                 $this->manageService($service, 'stop');
                 $this->manageService($service, 'disable');
             }
         }
-        
+
         return true;
     }
 
@@ -130,7 +130,7 @@ class SystemService
         $output = shell_exec("systemctl status {$service} --no-pager 2>/dev/null");
         $activeOutput = shell_exec("systemctl is-active {$service} 2>/dev/null");
         $enabledOutput = shell_exec("systemctl is-enabled {$service} 2>/dev/null");
-        
+
         return [
             'service' => $service,
             'active' => trim($activeOutput),
@@ -144,48 +144,48 @@ class SystemService
     {
         if (!is_dir($path)) {
             $this->logger->info("Creating directory: {$path}");
-            
+
             if (!mkdir($path, $permissions, true)) {
                 $this->logger->error("Failed to create directory: {$path}");
                 return false;
             }
-            
+
             chmod($path, $permissions);
         }
-        
+
         return true;
     }
 
     public function copyFile(string $source, string $destination): bool
     {
         $this->logger->info("Copying file: {$source} -> {$destination}");
-        
+
         $dir = dirname($destination);
         if (!is_dir($dir)) {
             $this->createDirectory($dir);
         }
-        
+
         if (!copy($source, $destination)) {
             $this->logger->error("Failed to copy file: {$source} -> {$destination}");
             return false;
         }
-        
+
         return true;
     }
 
     public function copyDirectory(string $source, string $destination): bool
     {
         $this->logger->info("Copying directory: {$source} -> {$destination}");
-        
+
         if (!is_dir($source)) {
             $this->logger->error("Source directory does not exist: {$source}");
             return false;
         }
-        
+
         $command = "cp -r {$source} {$destination}";
         $output = shell_exec($command . ' 2>&1');
         $exitCode = shell_exec('echo $?');
-        
+
         if (trim($exitCode) === '0') {
             return true;
         } else {
@@ -211,11 +211,11 @@ class SystemService
     {
         if (is_dir($path)) {
             $this->logger->info("Removing directory: {$path}");
-            
+
             $command = "rm -rf {$path}";
             $output = shell_exec($command . ' 2>&1');
             $exitCode = shell_exec('echo $?');
-            
+
             return trim($exitCode) === '0';
         }
         return true;
@@ -236,7 +236,7 @@ class SystemService
         if (!file_exists($path)) {
             return null;
         }
-        
+
         return fileperms($path) & 0777;
     }
 
@@ -245,7 +245,7 @@ class SystemService
         if (!file_exists($path)) {
             return false;
         }
-        
+
         return chmod($path, $permissions);
     }
 
@@ -254,7 +254,7 @@ class SystemService
         if (!file_exists($path)) {
             return null;
         }
-        
+
         $owner = fileowner($path);
         return $owner ? posix_getpwuid($owner)['name'] : null;
     }
@@ -264,62 +264,62 @@ class SystemService
         if (!file_exists($path)) {
             return false;
         }
-        
+
         $command = "chown {$user}";
         if ($group) {
             $command .= ":{$group}";
         }
         $command .= " {$path}";
-        
+
         $output = shell_exec($command . ' 2>&1');
         $exitCode = shell_exec('echo $?');
-        
+
         return trim($exitCode) === '0';
     }
 
     public function executeCommand(string $command, array $environment = []): array
     {
         $this->logger->info("Executing command: {$command}");
-        
+
         // Set environment variables if provided
         $envString = '';
         foreach ($environment as $key => $value) {
             $envString .= "{$key}='{$value}' ";
         }
-        
+
         $fullCommand = $envString . $command;
         $output = shell_exec($fullCommand . ' 2>&1');
         $exitCode = shell_exec('echo $?');
-        
+
         $result = [
             'command' => $command,
             'output' => $output,
             'exit_code' => (int)trim($exitCode),
             'success' => trim($exitCode) === '0'
         ];
-        
+
         if ($result['success']) {
             $this->logger->info("Command executed successfully", $result);
         } else {
             $this->logger->error("Command execution failed", $result);
         }
-        
+
         return $result;
     }
 
     public function downloadFile(string $url, string $destination): bool
     {
         $this->logger->info("Downloading file: {$url} -> {$destination}");
-        
+
         $dir = dirname($destination);
         if (!is_dir($dir)) {
             $this->createDirectory($dir);
         }
-        
+
         $command = "curl -fsSL '{$url}' -o '{$destination}'";
         $output = shell_exec($command . ' 2>&1');
         $exitCode = shell_exec('echo $?');
-        
+
         if (trim($exitCode) === '0') {
             $this->logger->info("File downloaded successfully: {$destination}");
             return true;
@@ -337,13 +337,13 @@ class SystemService
     public function extractArchive(string $archive, string $destination): bool
     {
         $this->logger->info("Extracting archive: {$archive} -> {$destination}");
-        
+
         if (!is_dir($destination)) {
             $this->createDirectory($destination);
         }
-        
+
         $extension = pathinfo($archive, PATHINFO_EXTENSION);
-        
+
         switch ($extension) {
             case 'tgz':
             case 'gz':
@@ -359,10 +359,10 @@ class SystemService
                 $this->logger->error("Unsupported archive format: {$extension}");
                 return false;
         }
-        
+
         $output = shell_exec($command . ' 2>&1');
         $exitCode = shell_exec('echo $?');
-        
+
         if (trim($exitCode) === '0') {
             $this->logger->info("Archive extracted successfully");
             return true;
@@ -379,7 +379,7 @@ class SystemService
     public function getSystemLoad(): array
     {
         $loadAvg = sys_getloadavg();
-        
+
         return [
             '1min' => $loadAvg[0] ?? 0,
             '5min' => $loadAvg[1] ?? 0,
@@ -394,7 +394,7 @@ class SystemService
         if ($uptime) {
             return trim($uptime);
         }
-        
+
         // Fallback method
         $uptime = shell_exec('cat /proc/uptime | cut -d" " -f1');
         if ($uptime) {
@@ -402,10 +402,10 @@ class SystemService
             $days = floor($seconds / 86400);
             $hours = floor(($seconds % 86400) / 3600);
             $minutes = floor(($seconds % 3600) / 60);
-            
+
             return sprintf("%d days, %d hours, %d minutes", $days, $hours, $minutes);
         }
-        
+
         return 'Unknown';
     }
 
