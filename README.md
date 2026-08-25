@@ -51,7 +51,7 @@ OLS cPanel is a **modern, comprehensive solution** for integrating OpenLiteSpeed
 ### Quick Install
 ```bash
 # Download and run the installer
-curl -fsSL https://get.ols-cpanel.com | bash
+curl -fsSL https://raw.githubusercontent.com/afgupload/OLS-cPanel-WHM/main/installer/install.sh | bash
 ```
 
 ### Manual Install

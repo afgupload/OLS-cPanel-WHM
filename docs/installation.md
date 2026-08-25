@@ -89,7 +89,7 @@ sudo rm -rf /usr/local/lsws 2>/dev/null || true
 
 ```bash
 # Download and run the installer
-curl -fsSL https://get.ols-cpanel.com | bash
+curl -fsSL https://raw.githubusercontent.com/afgupload/OLS-cPanel-WHM/main/installer/install.sh | bash
 
 # Monitor installation progress
 tail -f /var/log/ols-cpanel/install.log
