@@ -11,16 +11,13 @@ use OLScPanel\Models\SslCertificate;
 
 class OpenLiteSpeedService
 {
-    private Logger $logger;
-    private ConfigManager $config;
-    private string $olsHome;
     private string $olsConfigFile;
 
-    public function __construct(Logger $logger, ConfigManager $config, string $olsHome = '/usr/local/lsws')
-    {
-        $this->logger = $logger;
-        $this->config = $config;
-        $this->olsHome = $olsHome;
+    public function __construct(
+        private Logger $logger,
+        private ConfigManager $config,
+        private string $olsHome = '/usr/local/lsws'
+    ) {
         $this->olsConfigFile = $olsHome . '/conf/httpd_config.conf';
     }
 

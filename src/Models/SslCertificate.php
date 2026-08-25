@@ -8,33 +8,20 @@ use JsonSerializable;
 
 class SslCertificate implements JsonSerializable
 {
-    private string $domain;
-    private string $certificate;
-    private string $privateKey;
-    private string $caBundle;
-    private string $issuer;
-    private ?string $expiresOn;
-    private bool $isSelfSigned;
-    private string $status;
-    private ?string $serialNumber;
-    private ?string $signatureAlgorithm;
-    private ?string $keySize;
-    private array $subjectAlternativeNames;
-
-    public function __construct(array $data)
-    {
-        $this->domain = $data['domain'] ?? '';
-        $this->certificate = $data['certificate'] ?? '';
-        $this->privateKey = $data['private_key'] ?? '';
-        $this->caBundle = $data['ca_bundle'] ?? '';
-        $this->issuer = $data['issuer'] ?? '';
-        $this->expiresOn = $data['expires_on'] ?? null;
-        $this->isSelfSigned = (bool)($data['is_self_signed'] ?? false);
-        $this->status = $data['status'] ?? 'unknown';
-        $this->serialNumber = $data['serial_number'] ?? null;
-        $this->signatureAlgorithm = $data['signature_algorithm'] ?? null;
-        $this->keySize = $data['key_size'] ?? null;
-        $this->subjectAlternativeNames = $data['subject_alternative_names'] ?? [];
+    public function __construct(
+        private string $domain = '',
+        private string $certificate = '',
+        private string $privateKey = '',
+        private string $caBundle = '',
+        private string $issuer = '',
+        private ?string $expiresOn = null,
+        private bool $isSelfSigned = false,
+        private string $status = 'unknown',
+        private ?string $serialNumber = null,
+        private ?string $signatureAlgorithm = null,
+        private ?string $keySize = null,
+        private array $subjectAlternativeNames = []
+    ) {
     }
 
     public function getDomain(): string

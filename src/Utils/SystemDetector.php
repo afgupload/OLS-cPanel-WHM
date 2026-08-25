@@ -8,12 +8,10 @@ use OLScPanel\Utils\Logger;
 
 class SystemDetector
 {
-    private Logger $logger;
     private array $systemInfo;
 
-    public function __construct(Logger $logger)
+    public function __construct(private Logger $logger)
     {
-        $this->logger = $logger;
         $this->systemInfo = $this->detectSystem();
     }
 

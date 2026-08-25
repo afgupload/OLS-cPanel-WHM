@@ -8,35 +8,21 @@ use JsonSerializable;
 
 class Domain implements JsonSerializable
 {
-    private string $domain;
-    private string $user;
-    private string $ip;
-    private string $owner;
-    private string $plan;
-    private bool $suspended;
-    private ?string $setupDate;
-    private ?string $documentRoot;
-    private ?string $phpVersion;
-    private ?SslCertificate $sslCertificate;
-    private array $subdomains;
-    private array $addonDomains;
-    private array $parkedDomains;
-
-    public function __construct(array $data)
-    {
-        $this->domain = $data['domain'] ?? '';
-        $this->user = $data['user'] ?? '';
-        $this->ip = $data['ip'] ?? '';
-        $this->owner = $data['owner'] ?? '';
-        $this->plan = $data['plan'] ?? 'default';
-        $this->suspended = (bool)($data['suspended'] ?? false);
-        $this->setupDate = $data['setup_date'] ?? null;
-        $this->documentRoot = $data['document_root'] ?? null;
-        $this->phpVersion = $data['php_version'] ?? null;
-        $this->sslCertificate = $data['ssl_certificate'] ?? null;
-        $this->subdomains = $data['subdomains'] ?? [];
-        $this->addonDomains = $data['addon_domains'] ?? [];
-        $this->parkedDomains = $data['parked_domains'] ?? [];
+    public function __construct(
+        private string $domain = '',
+        private string $user = '',
+        private string $ip = '',
+        private string $owner = '',
+        private string $plan = 'default',
+        private bool $suspended = false,
+        private ?string $setupDate = null,
+        private ?string $documentRoot = null,
+        private ?string $phpVersion = null,
+        private ?SslCertificate $sslCertificate = null,
+        private array $subdomains = [],
+        private array $addonDomains = [],
+        private array $parkedDomains = []
+    ) {
     }
 
     public function getDomain(): string
@@ -296,7 +282,7 @@ class Domain implements JsonSerializable
 
     public function isExpired(): bool
     {
-        return $this->sslCertificate && $this->sslCertificate->isExpired();
+        return $this->sslCertificate ? $this->sslCertificate->isExpired() : false;
     }
 
     public function getDomainType(): string

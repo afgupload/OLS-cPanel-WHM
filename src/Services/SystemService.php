@@ -9,13 +9,10 @@ use OLScPanel\Utils\SystemDetector;
 
 class SystemService
 {
-    private Logger $logger;
-    private SystemDetector $systemDetector;
-
-    public function __construct(Logger $logger, SystemDetector $systemDetector)
-    {
-        $this->logger = $logger;
-        $this->systemDetector = $systemDetector;
+    public function __construct(
+        private Logger $logger,
+        private SystemDetector $systemDetector
+    ) {
     }
 
     public function installPackage(string $package): bool

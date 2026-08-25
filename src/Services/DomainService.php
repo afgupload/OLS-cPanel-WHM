@@ -11,13 +11,10 @@ use OLScPanel\Config\ConfigManager;
 
 class DomainService
 {
-    private Logger $logger;
-    private ConfigManager $config;
-
-    public function __construct(Logger $logger, ConfigManager $config)
-    {
-        $this->logger = $logger;
-        $this->config = $config;
+    public function __construct(
+        private Logger $logger,
+        private ConfigManager $config
+    ) {
     }
 
     public function getAllDomains(): array
@@ -79,16 +76,16 @@ class DomainService
             if (isset($result['data']['cert'])) {
                 $certData = $result['data']['cert'];
 
-                return new SslCertificate([
-                    'domain' => $domain,
-                    'certificate' => $certData['certificate'] ?? '',
-                    'private_key' => $certData['key'] ?? '',
-                    'ca_bundle' => $certData['cabundle'] ?? '',
-                    'issuer' => $certData['issuer'] ?? '',
-                    'expires_on' => $certData['expires_on'] ?? null,
-                    'is_self_signed' => ($certData['is_self_signed'] ?? false) === 1,
-                    'status' => $certData['status'] ?? 'unknown'
-                ]);
+                return new SslCertificate(
+                    domain: $domain,
+                    certificate: $certData['certificate'] ?? '',
+                    privateKey: $certData['key'] ?? '',
+                    caBundle: $certData['cabundle'] ?? '',
+                    issuer: $certData['issuer'] ?? '',
+                    expiresOn: $certData['expires_on'] ?? null,
+                    isSelfSigned: ($certData['is_self_signed'] ?? false) === 1,
+                    status: $certData['status'] ?? 'unknown'
+                );
             }
 
             return null;
