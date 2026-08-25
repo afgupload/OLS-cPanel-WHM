@@ -8,35 +8,21 @@ use JsonSerializable;
 
 class Domain implements JsonSerializable
 {
-    private string $domain;
-    private string $user;
-    private string $ip;
-    private string $owner;
-    private string $plan;
-    private bool $suspended;
-    private ?string $setupDate;
-    private ?string $documentRoot;
-    private ?string $phpVersion;
-    private ?SslCertificate $sslCertificate;
-    private array $subdomains;
-    private array $addonDomains;
-    private array $parkedDomains;
-
-    public function __construct(array $data)
-    {
-        $this->domain = $data['domain'] ?? '';
-        $this->user = $data['user'] ?? '';
-        $this->ip = $data['ip'] ?? '';
-        $this->owner = $data['owner'] ?? '';
-        $this->plan = $data['plan'] ?? 'default';
-        $this->suspended = (bool)($data['suspended'] ?? false);
-        $this->setupDate = $data['setup_date'] ?? null;
-        $this->documentRoot = $data['document_root'] ?? null;
-        $this->phpVersion = $data['php_version'] ?? null;
-        $this->sslCertificate = $data['ssl_certificate'] ?? null;
-        $this->subdomains = $data['subdomains'] ?? [];
-        $this->addonDomains = $data['addon_domains'] ?? [];
-        $this->parkedDomains = $data['parked_domains'] ?? [];
+    public function __construct(
+        private string $domain = '',
+        private string $user = '',
+        private string $ip = '',
+        private string $owner = '',
+        private string $plan = 'default',
+        private bool $suspended = false,
+        private ?string $setupDate = null,
+        private ?string $documentRoot = null,
+        private ?string $phpVersion = null,
+        private ?SslCertificate $sslCertificate = null,
+        private array $subdomains = [],
+        private array $addonDomains = [],
+        private array $parkedDomains = []
+    ) {
     }
 
     public function getDomain(): string
@@ -181,12 +167,12 @@ class Domain implements JsonSerializable
 
     public function getSslExpiresInDays(): ?int
     {
-        return $this->sslCertificate ? $this->sslCertificate->getDaysUntilExpiration() : null;
+        return $this->sslCertificate?->getDaysUntilExpiration();
     }
 
     public function isMainDomain(): bool
     {
-        return !str_contains($this->domain, '.') || 
+        return !str_contains($this->domain, '.') ||
                count(explode('.', $this->domain)) === 2;
     }
 
@@ -208,7 +194,7 @@ class Domain implements JsonSerializable
             'setup_date' => $this->setupDate,
             'document_root' => $this->documentRoot,
             'php_version' => $this->phpVersion,
-            'ssl_certificate' => $this->sslCertificate ? $this->sslCertificate->toArray() : null,
+            'ssl_certificate' => $this->sslCertificate?->toArray(),
             'subdomains' => $this->subdomains,
             'addon_domains' => $this->addonDomains,
             'parked_domains' => $this->parkedDomains,
@@ -232,7 +218,7 @@ class Domain implements JsonSerializable
 
     public function equals(Domain $other): bool
     {
-        return $this->domain === $other->getDomain() && 
+        return $this->domain === $other->getDomain() &&
                $this->user === $other->getUser();
     }
 
@@ -296,36 +282,28 @@ class Domain implements JsonSerializable
 
     public function isExpired(): bool
     {
-        return $this->sslCertificate && $this->sslCertificate->isExpired();
+        return $this->sslCertificate?->isExpired() ?? false;
     }
 
     public function getDomainType(): string
     {
         if ($this->isMainDomain()) {
             return 'main';
-        } elseif ($this->getSubdomainLevel() > 0) {
-            return 'subdomain';
-        } else {
-            return 'addon';
         }
+        if ($this->getSubdomainLevel() > 0) {
+            return 'subdomain';
+        }
+        return 'addon';
     }
 
     public function getDisplayName(): string
     {
-        $type = $this->getDomainType();
-        $prefix = '';
-        
-        switch ($type) {
-            case 'main':
-                $prefix = '🏠 ';
-                break;
-            case 'subdomain':
-                $prefix = '🔗 ';
-                break;
-            case 'addon':
-                $prefix = '➕ ';
-                break;
-        }
+        $prefix = match ($this->getDomainType()) {
+            'main' => '🏠 ',
+            'subdomain' => '🔗 ',
+            'addon' => '➕ ',
+            default => '',
+        };
 
         return $prefix . $this->domain;
     }
@@ -334,26 +312,23 @@ class Domain implements JsonSerializable
     {
         if ($this->suspended) {
             return 'suspended';
-        } elseif ($this->isExpired()) {
-            return 'ssl_expired';
-        } elseif ($this->hasSsl()) {
-            return 'ssl_active';
-        } else {
-            return 'active';
         }
+        if ($this->isExpired()) {
+            return 'ssl_expired';
+        }
+        if ($this->hasSsl()) {
+            return 'ssl_active';
+        }
+        return 'active';
     }
 
     public function getStatusColor(): string
     {
-        switch ($this->getStatus()) {
-            case 'suspended':
-                return 'red';
-            case 'ssl_expired':
-                return 'orange';
-            case 'ssl_active':
-                return 'green';
-            default:
-                return 'blue';
-        }
+        return match ($this->getStatus()) {
+            'suspended' => 'red',
+            'ssl_expired' => 'orange',
+            'ssl_active' => 'green',
+            default => 'blue',
+        };
     }
 }

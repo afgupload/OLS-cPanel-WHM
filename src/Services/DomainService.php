@@ -11,13 +11,10 @@ use OLScPanel\Config\ConfigManager;
 
 class DomainService
 {
-    private Logger $logger;
-    private ConfigManager $config;
-
-    public function __construct(Logger $logger, ConfigManager $config)
-    {
-        $this->logger = $logger;
-        $this->config = $config;
+    public function __construct(
+        private Logger $logger,
+        private ConfigManager $config
+    ) {
     }
 
     public function getAllDomains(): array
@@ -49,7 +46,6 @@ class DomainService
             ]);
 
             return $domains;
-
         } catch (\Exception $e) {
             $this->logger->error('Failed to retrieve domains', [
                 'error' => $e->getMessage()
@@ -79,21 +75,20 @@ class DomainService
 
             if (isset($result['data']['cert'])) {
                 $certData = $result['data']['cert'];
-                
-                return new SslCertificate([
-                    'domain' => $domain,
-                    'certificate' => $certData['certificate'] ?? '',
-                    'private_key' => $certData['key'] ?? '',
-                    'ca_bundle' => $certData['cabundle'] ?? '',
-                    'issuer' => $certData['issuer'] ?? '',
-                    'expires_on' => $certData['expires_on'] ?? null,
-                    'is_self_signed' => ($certData['is_self_signed'] ?? false) === 1,
-                    'status' => $certData['status'] ?? 'unknown'
-                ]);
+
+                return new SslCertificate(
+                    domain: $domain,
+                    certificate: $certData['certificate'] ?? '',
+                    privateKey: $certData['key'] ?? '',
+                    caBundle: $certData['cabundle'] ?? '',
+                    issuer: $certData['issuer'] ?? '',
+                    expiresOn: $certData['expires_on'] ?? null,
+                    isSelfSigned: ($certData['is_self_signed'] ?? false) === 1,
+                    status: $certData['status'] ?? 'unknown'
+                );
             }
 
             return null;
-
         } catch (\Exception $e) {
             $this->logger->warning('Failed to get SSL info for domain', [
                 'domain' => $domain,
@@ -116,7 +111,6 @@ class DomainService
             }
 
             return $this->config->get('php.default_version', '8.1');
-
         } catch (\Exception $e) {
             $this->logger->warning('Failed to get PHP version for domain', [
                 'domain' => $domain,
@@ -147,7 +141,6 @@ class DomainService
             }
 
             return $subdomains;
-
         } catch (\Exception $e) {
             $this->logger->error('Failed to get subdomains', [
                 'main_domain' => $mainDomain,
@@ -177,7 +170,6 @@ class DomainService
             }
 
             return $addonDomains;
-
         } catch (\Exception $e) {
             $this->logger->error('Failed to get addon domains', [
                 'username' => $username,
@@ -207,7 +199,6 @@ class DomainService
             }
 
             return $parkedDomains;
-
         } catch (\Exception $e) {
             $this->logger->error('Failed to get parked domains', [
                 'username' => $username,
@@ -230,7 +221,6 @@ class DomainService
             }
 
             return "/home/{$this->getDomainUser($domain)}/public_html";
-
         } catch (\Exception $e) {
             $this->logger->warning('Failed to get document root for domain', [
                 'domain' => $domain,
@@ -243,19 +233,19 @@ class DomainService
     public function getDomainUser(string $domain): string
     {
         $domainObj = $this->getDomain($domain);
-        return $domainObj ? $domainObj->getUser() : 'nobody';
+        return $domainObj?->getUser() ?? 'nobody';
     }
 
     public function isDomainSuspended(string $domain): bool
     {
         $domainObj = $this->getDomain($domain);
-        return $domainObj ? $domainObj->isSuspended() : false;
+        return $domainObj?->isSuspended() ?? false;
     }
 
     public function getDomainIp(string $domain): string
     {
         $domainObj = $this->getDomain($domain);
-        return $domainObj ? $domainObj->getIp() : '127.0.0.1';
+        return $domainObj?->getIp() ?? '127.0.0.1';
     }
 
     public function getDomainPort(bool $ssl = false): int
@@ -320,11 +310,11 @@ class DomainService
             $errors[] = 'Domain contains invalid characters';
         }
 
-        if (strpos($domain, '..') !== false) {
+        if (str_contains($domain, '..')) {
             $errors[] = 'Domain cannot contain consecutive dots';
         }
 
-        if (substr($domain, -1) === '.' || substr($domain, 0, 1) === '.') {
+        if (str_ends_with($domain, '.') || str_starts_with($domain, '.')) {
             $errors[] = 'Domain cannot start or end with a dot';
         }
 
@@ -334,7 +324,7 @@ class DomainService
     private function executeWhmApi(string $function, array $params = []): array
     {
         $command = 'whmapi1 ' . $function;
-        
+
         foreach ($params as $key => $value) {
             if (is_bool($value)) {
                 $value = $value ? '1' : '0';
@@ -362,13 +352,13 @@ class DomainService
     public function refreshDomainCache(): void
     {
         $this->logger->info('Refreshing domain cache');
-        
+
         try {
             $this->executeWhmApi('setup_user_session', [
                 'api.version' => 1,
                 'user' => 'root'
             ]);
-            
+
             $this->logger->info('Domain cache refreshed successfully');
         } catch (\Exception $e) {
             $this->logger->error('Failed to refresh domain cache', [

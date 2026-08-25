@@ -10,9 +10,9 @@ use Monolog\Handler\RotatingFileHandler;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\ErrorLogHandler;
 
-class OLSLogger
+class Logger
 {
-    private Logger $logger;
+    private \Monolog\Logger $logger;
     private string $logDir;
     private string $logFile;
 
@@ -20,7 +20,7 @@ class OLSLogger
     {
         $this->logDir = $logDir;
         $this->logFile = $logDir . '/ols-cpanel.log';
-        
+
         if (!is_dir($this->logDir)) {
             mkdir($this->logDir, 0755, true);
         }
@@ -216,7 +216,7 @@ class OLSLogger
         ]));
     }
 
-    public function getLogs(int $limit = 100, string $level = null, string $type = null): array
+    public function getLogs(int $limit = 100, ?string $level = null, ?string $type = null): array
     {
         $logFile = $this->logFile;
         if (!file_exists($logFile)) {
@@ -229,7 +229,7 @@ class OLSLogger
 
         for ($i = count($lines) - 1; $i >= 0 && $count < $limit; $i--) {
             $line = $lines[$i];
-            
+
             if ($this->matchesFilter($line, $level, $type)) {
                 $logs[] = $this->parseLogLine($line);
                 $count++;
@@ -266,7 +266,7 @@ class OLSLogger
                 $jsonStart = strpos($matches[3], '{');
                 $jsonPart = substr($matches[3], $jsonStart);
                 $context = json_decode($jsonPart, true);
-                
+
                 if ($context !== null) {
                     $parsed['message'] = substr($matches[3], 0, $jsonStart);
                     $parsed['context'] = $context;
@@ -338,7 +338,7 @@ class OLSLogger
     public function setLogLevel(string $level): void
     {
         $logLevel = constant(Logger::class . '::' . strtoupper($level));
-        
+
         foreach ($this->logger->getHandlers() as $handler) {
             $handler->setLevel($logLevel);
         }

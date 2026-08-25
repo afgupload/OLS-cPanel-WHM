@@ -8,33 +8,20 @@ use JsonSerializable;
 
 class SslCertificate implements JsonSerializable
 {
-    private string $domain;
-    private string $certificate;
-    private string $privateKey;
-    private string $caBundle;
-    private string $issuer;
-    private ?string $expiresOn;
-    private bool $isSelfSigned;
-    private string $status;
-    private ?string $serialNumber;
-    private ?string $signatureAlgorithm;
-    private ?string $keySize;
-    private array $subjectAlternativeNames;
-
-    public function __construct(array $data)
-    {
-        $this->domain = $data['domain'] ?? '';
-        $this->certificate = $data['certificate'] ?? '';
-        $this->privateKey = $data['private_key'] ?? '';
-        $this->caBundle = $data['ca_bundle'] ?? '';
-        $this->issuer = $data['issuer'] ?? '';
-        $this->expiresOn = $data['expires_on'] ?? null;
-        $this->isSelfSigned = (bool)($data['is_self_signed'] ?? false);
-        $this->status = $data['status'] ?? 'unknown';
-        $this->serialNumber = $data['serial_number'] ?? null;
-        $this->signatureAlgorithm = $data['signature_algorithm'] ?? null;
-        $this->keySize = $data['key_size'] ?? null;
-        $this->subjectAlternativeNames = $data['subject_alternative_names'] ?? [];
+    public function __construct(
+        private string $domain = '',
+        private string $certificate = '',
+        private string $privateKey = '',
+        private string $caBundle = '',
+        private string $issuer = '',
+        private ?string $expiresOn = null,
+        private bool $isSelfSigned = false,
+        private string $status = 'unknown',
+        private ?string $serialNumber = null,
+        private ?string $signatureAlgorithm = null,
+        private ?string $keySize = null,
+        private array $subjectAlternativeNames = []
+    ) {
     }
 
     public function getDomain(): string
@@ -165,7 +152,7 @@ class SslCertificate implements JsonSerializable
 
         $expiryDate = new \DateTime($this->expiresOn);
         $now = new \DateTime();
-        
+
         return $expiryDate < $now;
     }
 
@@ -177,9 +164,9 @@ class SslCertificate implements JsonSerializable
 
         $expiryDate = new \DateTime($this->expiresOn);
         $now = new \DateTime();
-        
+
         $interval = $now->diff($expiryDate);
-        return (int)$interval->format('%r%a');
+        return (int) $interval->format('%r%a');
     }
 
     public function isExpiringSoon(int $days = 30): bool
@@ -190,23 +177,23 @@ class SslCertificate implements JsonSerializable
 
     public function isValid(): bool
     {
-        return !empty($this->certificate) && 
-               !empty($this->privateKey) && 
-               !$this->isExpired() && 
+        return !empty($this->certificate) &&
+               !empty($this->privateKey) &&
+               !$this->isExpired() &&
                !$this->isSelfSigned;
     }
 
     public function isLetsEncrypt(): bool
     {
-        return str_contains($this->issuer, 'Let\'s Encrypt') || 
-               str_contains($this->issuer, 'R3') || 
+        return str_contains($this->issuer, 'Let\'s Encrypt') ||
+               str_contains($this->issuer, 'R3') ||
                str_contains($this->issuer, 'ISRG');
     }
 
     public function isCommercial(): bool
     {
         $commercialIssuers = [
-            'DigiCert', 'Comodo', 'GlobalSign', 'Sectigo', 
+            'DigiCert', 'Comodo', 'GlobalSign', 'Sectigo',
             'GeoTrust', 'Thawte', 'RapidSSL', 'Symantec'
         ];
 
@@ -223,45 +210,43 @@ class SslCertificate implements JsonSerializable
     {
         if ($this->isSelfSigned()) {
             return 'self_signed';
-        } elseif ($this->isLetsEncrypt()) {
-            return 'lets_encrypt';
-        } elseif ($this->isCommercial()) {
-            return 'commercial';
-        } else {
-            return 'other';
         }
+        if ($this->isLetsEncrypt()) {
+            return 'lets_encrypt';
+        }
+        if ($this->isCommercial()) {
+            return 'commercial';
+        }
+        return 'other';
     }
 
     public function getExpirationStatus(): string
     {
         $daysUntil = $this->getDaysUntilExpiration();
-        
+
         if ($daysUntil === null) {
             return 'unknown';
-        } elseif ($daysUntil < 0) {
-            return 'expired';
-        } elseif ($daysUntil <= 7) {
-            return 'critical';
-        } elseif ($daysUntil <= 30) {
-            return 'warning';
-        } else {
-            return 'valid';
         }
+        if ($daysUntil < 0) {
+            return 'expired';
+        }
+        if ($daysUntil <= 7) {
+            return 'critical';
+        }
+        if ($daysUntil <= 30) {
+            return 'warning';
+        }
+        return 'valid';
     }
 
     public function getExpirationStatusColor(): string
     {
-        switch ($this->getExpirationStatus()) {
-            case 'expired':
-            case 'critical':
-                return 'red';
-            case 'warning':
-                return 'orange';
-            case 'valid':
-                return 'green';
-            default:
-                return 'gray';
-        }
+        return match ($this->getExpirationStatus()) {
+            'expired', 'critical' => 'red',
+            'warning' => 'orange',
+            'valid' => 'green',
+            default => 'gray',
+        };
     }
 
     public function parseCertificate(): array
@@ -271,7 +256,7 @@ class SslCertificate implements JsonSerializable
         }
 
         $certData = [];
-        
+
         $tempCertFile = tempnam(sys_get_temp_dir(), 'cert_');
         file_put_contents($tempCertFile, $this->certificate);
 
@@ -322,7 +307,7 @@ class SslCertificate implements JsonSerializable
         if (!empty($this->certificate) && !empty($this->privateKey)) {
             $tempCertFile = tempnam(sys_get_temp_dir(), 'cert_');
             $tempKeyFile = tempnam(sys_get_temp_dir(), 'key_');
-            
+
             file_put_contents($tempCertFile, $this->certificate);
             file_put_contents($tempKeyFile, $this->privateKey);
 
@@ -396,19 +381,20 @@ class SslCertificate implements JsonSerializable
     public function getRenewalRecommendation(): string
     {
         $daysUntil = $this->getDaysUntilExpiration();
-        
+
         if ($daysUntil === null) {
             return 'Unable to determine expiration date';
         }
 
         if ($daysUntil < 0) {
             return 'Certificate has expired. Immediate renewal required.';
-        } elseif ($daysUntil <= 7) {
-            return 'Certificate expires very soon. Renew immediately.';
-        } elseif ($daysUntil <= 30) {
-            return 'Certificate expires soon. Schedule renewal.';
-        } else {
-            return 'Certificate is valid. No immediate action needed.';
         }
+        if ($daysUntil <= 7) {
+            return 'Certificate expires very soon. Renew immediately.';
+        }
+        if ($daysUntil <= 30) {
+            return 'Certificate expires soon. Schedule renewal.';
+        }
+        return 'Certificate is valid. No immediate action needed.';
     }
 }

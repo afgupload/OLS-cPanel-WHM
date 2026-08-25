@@ -10,15 +10,13 @@ use InvalidArgumentException;
 
 class ConfigManager
 {
-    private Logger $logger;
     private array $config = [];
     private string $configFile;
-    private string $configDir;
 
-    public function __construct(Logger $logger, string $configDir = '/etc/ols-cpanel')
-    {
-        $this->logger = $logger;
-        $this->configDir = $configDir;
+    public function __construct(
+        private Logger $logger,
+        private string $configDir = '/etc/ols-cpanel'
+    ) {
         $this->configFile = $configDir . '/config.yaml';
         $this->loadConfig();
     }
@@ -39,7 +37,6 @@ class ConfigManager
             $this->logger->info('Configuration loaded successfully', [
                 'file' => $this->configFile
             ]);
-
         } catch (\Exception $e) {
             $this->logger->error('Failed to load configuration', [
                 'error' => $e->getMessage(),
@@ -53,7 +50,7 @@ class ConfigManager
     {
         try {
             $yaml = Yaml::dump($this->config, 4, 2);
-            
+
             if (!file_put_contents($this->configFile, $yaml)) {
                 throw new \RuntimeException("Failed to write config file: {$this->configFile}");
             }
@@ -64,7 +61,6 @@ class ConfigManager
             ]);
 
             return true;
-
         } catch (\Exception $e) {
             $this->logger->error('Failed to save configuration', [
                 'error' => $e->getMessage(),
@@ -74,7 +70,7 @@ class ConfigManager
         }
     }
 
-    public function get(string $key, $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         $keys = explode('.', $key);
         $value = $this->config;
@@ -89,7 +85,7 @@ class ConfigManager
         return $value;
     }
 
-    public function set(string $key, $value): void
+    public function set(string $key, mixed $value): void
     {
         $keys = explode('.', $key);
         $config = &$this->config;
@@ -293,7 +289,7 @@ class ConfigManager
     public function getConfigTemplate(string $template): array
     {
         $templateFile = $this->configDir . '/templates/' . $template . '.yaml';
-        
+
         if (!file_exists($templateFile)) {
             throw new InvalidArgumentException("Template not found: {$template}");
         }
@@ -305,7 +301,7 @@ class ConfigManager
     {
         $templateConfig = $this->getConfigTemplate($template);
         $this->config = array_merge_recursive($this->config, $templateConfig, $overrides);
-        
+
         return $this->saveConfig();
     }
 }
