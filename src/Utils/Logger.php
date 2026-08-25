@@ -216,7 +216,7 @@ class Logger
         ]));
     }
 
-    public function getLogs(int $limit = 100, string $level = null, string $type = null): array
+    public function getLogs(int $limit = 100, ?string $level = null, ?string $type = null): array
     {
         $logFile = $this->logFile;
         if (!file_exists($logFile)) {

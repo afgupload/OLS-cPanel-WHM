@@ -166,7 +166,7 @@ class SslCertificate implements JsonSerializable
         $now = new \DateTime();
 
         $interval = $now->diff($expiryDate);
-        return (int)$interval->format('%r%a');
+        return (int) $interval->format('%r%a');
     }
 
     public function isExpiringSoon(int $days = 30): bool
@@ -210,13 +210,14 @@ class SslCertificate implements JsonSerializable
     {
         if ($this->isSelfSigned()) {
             return 'self_signed';
-        } elseif ($this->isLetsEncrypt()) {
-            return 'lets_encrypt';
-        } elseif ($this->isCommercial()) {
-            return 'commercial';
-        } else {
-            return 'other';
         }
+        if ($this->isLetsEncrypt()) {
+            return 'lets_encrypt';
+        }
+        if ($this->isCommercial()) {
+            return 'commercial';
+        }
+        return 'other';
     }
 
     public function getExpirationStatus(): string
@@ -225,30 +226,27 @@ class SslCertificate implements JsonSerializable
 
         if ($daysUntil === null) {
             return 'unknown';
-        } elseif ($daysUntil < 0) {
-            return 'expired';
-        } elseif ($daysUntil <= 7) {
-            return 'critical';
-        } elseif ($daysUntil <= 30) {
-            return 'warning';
-        } else {
-            return 'valid';
         }
+        if ($daysUntil < 0) {
+            return 'expired';
+        }
+        if ($daysUntil <= 7) {
+            return 'critical';
+        }
+        if ($daysUntil <= 30) {
+            return 'warning';
+        }
+        return 'valid';
     }
 
     public function getExpirationStatusColor(): string
     {
-        switch ($this->getExpirationStatus()) {
-            case 'expired':
-            case 'critical':
-                return 'red';
-            case 'warning':
-                return 'orange';
-            case 'valid':
-                return 'green';
-            default:
-                return 'gray';
-        }
+        return match ($this->getExpirationStatus()) {
+            'expired', 'critical' => 'red',
+            'warning' => 'orange',
+            'valid' => 'green',
+            default => 'gray',
+        };
     }
 
     public function parseCertificate(): array
@@ -390,12 +388,13 @@ class SslCertificate implements JsonSerializable
 
         if ($daysUntil < 0) {
             return 'Certificate has expired. Immediate renewal required.';
-        } elseif ($daysUntil <= 7) {
-            return 'Certificate expires very soon. Renew immediately.';
-        } elseif ($daysUntil <= 30) {
-            return 'Certificate expires soon. Schedule renewal.';
-        } else {
-            return 'Certificate is valid. No immediate action needed.';
         }
+        if ($daysUntil <= 7) {
+            return 'Certificate expires very soon. Renew immediately.';
+        }
+        if ($daysUntil <= 30) {
+            return 'Certificate expires soon. Schedule renewal.';
+        }
+        return 'Certificate is valid. No immediate action needed.';
     }
 }

@@ -37,13 +37,13 @@ class OpenLiteSpeedService
         if (trim($exitCode) === '0') {
             $this->logger->info('OpenLiteSpeed started successfully');
             return true;
-        } else {
-            $this->logger->error('Failed to start OpenLiteSpeed', [
-                'output' => $result,
-                'exit_code' => $exitCode
-            ]);
-            return false;
         }
+
+        $this->logger->error('Failed to start OpenLiteSpeed', [
+            'output' => $result,
+            'exit_code' => $exitCode
+        ]);
+        return false;
     }
 
     public function stop(): bool
@@ -56,13 +56,13 @@ class OpenLiteSpeedService
         if (trim($exitCode) === '0') {
             $this->logger->info('OpenLiteSpeed stopped successfully');
             return true;
-        } else {
-            $this->logger->error('Failed to stop OpenLiteSpeed', [
-                'output' => $result,
-                'exit_code' => $exitCode
-            ]);
-            return false;
         }
+
+        $this->logger->error('Failed to stop OpenLiteSpeed', [
+            'output' => $result,
+            'exit_code' => $exitCode
+        ]);
+        return false;
     }
 
     public function restart(): bool
@@ -75,13 +75,13 @@ class OpenLiteSpeedService
         if (trim($exitCode) === '0') {
             $this->logger->info('OpenLiteSpeed restarted successfully');
             return true;
-        } else {
-            $this->logger->error('Failed to restart OpenLiteSpeed', [
-                'output' => $result,
-                'exit_code' => $exitCode
-            ]);
-            return false;
         }
+
+        $this->logger->error('Failed to restart OpenLiteSpeed', [
+            'output' => $result,
+            'exit_code' => $exitCode
+        ]);
+        return false;
     }
 
     public function reload(): bool
@@ -94,13 +94,13 @@ class OpenLiteSpeedService
         if (trim($exitCode) === '0') {
             $this->logger->info('OpenLiteSpeed reloaded successfully');
             return true;
-        } else {
-            $this->logger->error('Failed to reload OpenLiteSpeed', [
-                'output' => $result,
-                'exit_code' => $exitCode
-            ]);
-            return false;
         }
+
+        $this->logger->error('Failed to reload OpenLiteSpeed', [
+            'output' => $result,
+            'exit_code' => $exitCode
+        ]);
+        return false;
     }
 
     public function generateConfiguration(array $domains): bool
@@ -517,13 +517,13 @@ class OpenLiteSpeedService
         $output = shell_exec("{$this->olsHome}/bin/lswsctrl status 2>/dev/null");
         if ($output) {
             if (preg_match('/Total Connections:\s*(\d+)/', $output, $matches)) {
-                $connections['total'] = (int)$matches[1];
+                $connections['total'] = (int) $matches[1];
             }
             if (preg_match('/Active Connections:\s*(\d+)/', $output, $matches)) {
-                $connections['active'] = (int)$matches[1];
+                $connections['active'] = (int) $matches[1];
             }
             if (preg_match('/SSL Connections:\s*(\d+)/', $output, $matches)) {
-                $connections['ssl'] = (int)$matches[1];
+                $connections['ssl'] = (int) $matches[1];
             }
         }
 
@@ -542,9 +542,9 @@ class OpenLiteSpeedService
         if ($pid) {
             $output = shell_exec("ps -p {$pid} -o rss,vsz 2>/dev/null | tail -1");
             if ($output && preg_match('/(\d+)\s+(\d+)/', $output, $matches)) {
-                $memory['used'] = (int)$matches[1] * 1024; // Convert KB to bytes
-                $memory['total'] = (int)$matches[2] * 1024;
-                $memory['percentage'] = $memory['total'] > 0 ? ($memory['used'] / $memory['total']) * 100 : 0;
+                $memory['used'] = (int) $matches[1] * 1024; // Convert KB to bytes
+                $memory['total'] = (int) $matches[2] * 1024;
+                $memory['percentage'] = $memory['total'] > 0 ? ((float) $memory['used'] / (float) $memory['total']) * 100 : 0;
             }
         }
 
@@ -557,7 +557,7 @@ class OpenLiteSpeedService
         if ($pid) {
             $output = shell_exec("ps -p {$pid} -o %cpu 2>/dev/null | tail -1");
             if ($output) {
-                return (float)trim($output);
+                return (float) trim($output);
             }
         }
 

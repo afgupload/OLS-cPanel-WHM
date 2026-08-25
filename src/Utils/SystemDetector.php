@@ -86,18 +86,16 @@ class SystemDetector
     {
         if ($this->isDebianBased()) {
             return 'apache2';
-        } else {
-            return 'httpd';
         }
+        return 'httpd';
     }
 
     public function getApacheConfigPath(): string
     {
         if ($this->isDebianBased()) {
             return '/etc/apache2';
-        } else {
-            return '/etc/httpd';
         }
+        return '/etc/httpd';
     }
 
     public function getSystemdPath(): string
@@ -107,11 +105,7 @@ class SystemDetector
 
     public function getLogPath(): string
     {
-        if ($this->isDebianBased()) {
-            return '/var/log';
-        } else {
-            return '/var/log';
-        }
+        return '/var/log';
     }
 
     public function getTempPath(): string
@@ -224,13 +218,13 @@ class SystemDetector
         if ($systemInfo['os'] === 'Unknown') {
             if (file_exists('/etc/redhat-release')) {
                 $release = file_get_contents('/etc/redhat-release');
-                if (strpos($release, 'AlmaLinux') !== false) {
+                if (str_contains($release, 'AlmaLinux')) {
                     $systemInfo['os'] = 'AlmaLinux';
                     $systemInfo['family'] = 'almalinux';
-                } elseif (strpos($release, 'Rocky') !== false) {
+                } elseif (str_contains($release, 'Rocky')) {
                     $systemInfo['os'] = 'Rocky Linux';
                     $systemInfo['family'] = 'rocky';
-                } elseif (strpos($release, 'CloudLinux') !== false) {
+                } elseif (str_contains($release, 'CloudLinux')) {
                     $systemInfo['os'] = 'CloudLinux';
                     $systemInfo['family'] = 'cloudlinux';
                 }
@@ -267,23 +261,14 @@ class SystemDetector
 
     private function isOsSupported(string $os, string $version): bool
     {
-        $majorVersion = (int)explode('.', $version)[0];
+        $majorVersion = (int) explode('.', $version)[0];
 
-        switch ($os) {
-            case 'AlmaLinux':
-            case 'Rocky Linux':
-            case 'CloudLinux':
-                return $majorVersion >= 9;
-
-            case 'Ubuntu':
-                return $majorVersion >= 22;
-
-            case 'Debian':
-                return $majorVersion >= 12;
-
-            default:
-                return false;
-        }
+        return match ($os) {
+            'AlmaLinux', 'Rocky Linux', 'CloudLinux' => $majorVersion >= 9,
+            'Ubuntu' => $majorVersion >= 22,
+            'Debian' => $majorVersion >= 12,
+            default => false,
+        };
     }
 
     private function commandExists(string $command): bool
@@ -303,8 +288,8 @@ class SystemDetector
         preg_match('/MemTotal:\s+(\d+)\s+kB/', $meminfo, $matches);
 
         return [
-            'total' => isset($matches[1]) ? (int)$matches[1] * 1024 : 0,
-            'formatted' => isset($matches[1]) ? round($matches[1] / 1024 / 1024, 2) . ' GB' : 'Unknown'
+            'total' => isset($matches[1]) ? (int) $matches[1] * 1024 : 0,
+            'formatted' => isset($matches[1]) ? round((float) $matches[1] / 1024 / 1024, 2) . ' GB' : 'Unknown'
         ];
     }
 
@@ -312,10 +297,10 @@ class SystemDetector
     {
         $output = shell_exec('df -B1 / 2>/dev/null');
         if ($output && preg_match('/\d+\s+\d+\s+(\d+)\s+/', $output, $matches)) {
-            $available = (int)$matches[1];
+            $available = (int) $matches[1];
             return [
                 'available' => $available,
-                'formatted' => round($available / 1024 / 1024 / 1024, 2) . ' GB'
+                'formatted' => round((float) $available / 1024 / 1024 / 1024, 2) . ' GB'
             ];
         }
 

@@ -18,7 +18,11 @@
               <div class="stat-value">{{ stat.value }}</div>
               <div class="stat-label">{{ stat.label }}</div>
               <div class="stat-change" :class="stat.changeType">
-                <el-icon><ArrowUp v-if="stat.changeType === 'positive'" /><ArrowDown v-else /></el-icon>
+                <el-icon v-if="stat.changeType !== 'neutral'">
+                  <ArrowUp v-if="stat.changeType === 'positive'" />
+                  <ArrowDown v-else />
+                </el-icon>
+                <el-icon v-else><Minus /></el-icon>
                 {{ stat.change }}
               </div>
             </div>
@@ -95,7 +99,7 @@
           <template #header>
             <div class="card-header">
               <h3>Recent Activity</h3>
-              <el-button type="text" size="small" @click="viewAllLogs">
+              <el-button text type="primary" size="small" @click="viewAllLogs">
                 View All
               </el-button>
             </div>
@@ -124,7 +128,7 @@
             <div class="card-header">
               <h3>Domain Overview</h3>
               <div class="header-actions">
-                <el-button type="text" @click="viewAllDomains">
+                <el-button type="primary" text @click="viewAllDomains">
                   View All Domains
                 </el-button>
                 <el-button type="primary" @click="addDomain">
@@ -164,10 +168,10 @@
             <el-table-column prop="lastUpdated" label="Last Updated" width="150" />
             <el-table-column label="Actions" width="120">
               <template #default="{ row }">
-                <el-button type="text" size="small" @click="editDomain(row)">
+                <el-button type="primary" text size="small" @click="editDomain(row)">
                   Edit
                 </el-button>
-                <el-button type="text" size="small" @click="viewDomain(row)">
+                <el-button type="primary" text size="small" @click="viewDomain(row)">
                   View
                 </el-button>
               </template>
@@ -203,7 +207,8 @@ import {
   Plus,
   Check,
   Warning,
-  Close
+  Close,
+  Minus
 } from '@element-plus/icons-vue'
 import {
   fetchServerStats,

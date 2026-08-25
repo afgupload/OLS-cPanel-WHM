@@ -27,14 +27,14 @@ class SystemService
         if (trim($exitCode) === '0') {
             $this->logger->info("Package {$package} installed successfully");
             return true;
-        } else {
-            $this->logger->error("Failed to install package {$package}", [
-                'command' => $command,
-                'output' => $output,
-                'exit_code' => $exitCode
-            ]);
-            return false;
         }
+
+        $this->logger->error("Failed to install package {$package}", [
+            'command' => $command,
+            'output' => $output,
+            'exit_code' => $exitCode
+        ]);
+        return false;
     }
 
     public function installPackages(array $packages): array
@@ -67,14 +67,14 @@ class SystemService
         if (trim($exitCode) === '0') {
             $this->logger->info('System updated successfully');
             return true;
-        } else {
-            $this->logger->error('Failed to update system', [
-                'command' => $command,
-                'output' => $output,
-                'exit_code' => $exitCode
-            ]);
-            return false;
         }
+
+        $this->logger->error('Failed to update system', [
+            'command' => $command,
+            'output' => $output,
+            'exit_code' => $exitCode
+        ]);
+        return false;
     }
 
     public function manageService(string $service, string $action): bool
@@ -89,14 +89,14 @@ class SystemService
         if (trim($exitCode) === '0') {
             $this->logger->info("Service {$service} {$action} successful");
             return true;
-        } else {
-            $this->logger->error("Failed to {$action} service {$service}", [
-                'command' => $command,
-                'output' => $output,
-                'exit_code' => $exitCode
-            ]);
-            return false;
         }
+
+        $this->logger->error("Failed to {$action} service {$service}", [
+            'command' => $command,
+            'output' => $output,
+            'exit_code' => $exitCode
+        ]);
+        return false;
     }
 
     public function stopApache(): bool
@@ -185,14 +185,14 @@ class SystemService
 
         if (trim($exitCode) === '0') {
             return true;
-        } else {
-            $this->logger->error("Failed to copy directory", [
-                'command' => $command,
-                'output' => $output,
-                'exit_code' => $exitCode
-            ]);
-            return false;
         }
+
+        $this->logger->error("Failed to copy directory", [
+            'command' => $command,
+            'output' => $output,
+            'exit_code' => $exitCode
+        ]);
+        return false;
     }
 
     public function removeFile(string $path): bool
@@ -291,7 +291,7 @@ class SystemService
         $result = [
             'command' => $command,
             'output' => $output,
-            'exit_code' => (int)trim($exitCode),
+            'exit_code' => (int) trim($exitCode),
             'success' => trim($exitCode) === '0'
         ];
 
@@ -320,15 +320,15 @@ class SystemService
         if (trim($exitCode) === '0') {
             $this->logger->info("File downloaded successfully: {$destination}");
             return true;
-        } else {
-            $this->logger->error("Failed to download file", [
-                'url' => $url,
-                'destination' => $destination,
-                'output' => $output,
-                'exit_code' => $exitCode
-            ]);
-            return false;
         }
+
+        $this->logger->error("Failed to download file", [
+            'url' => $url,
+            'destination' => $destination,
+            'output' => $output,
+            'exit_code' => $exitCode
+        ]);
+        return false;
     }
 
     public function extractArchive(string $archive, string $destination): bool
@@ -341,20 +341,16 @@ class SystemService
 
         $extension = pathinfo($archive, PATHINFO_EXTENSION);
 
-        switch ($extension) {
-            case 'tgz':
-            case 'gz':
-                $command = "tar -xzf '{$archive}' -C '{$destination}'";
-                break;
-            case 'bz2':
-                $command = "tar -xjf '{$archive}' -C '{$destination}'";
-                break;
-            case 'zip':
-                $command = "unzip -q '{$archive}' -d '{$destination}'";
-                break;
-            default:
-                $this->logger->error("Unsupported archive format: {$extension}");
-                return false;
+        $command = match ($extension) {
+            'tgz', 'gz' => "tar -xzf '{$archive}' -C '{$destination}'",
+            'bz2' => "tar -xjf '{$archive}' -C '{$destination}'",
+            'zip' => "unzip -q '{$archive}' -d '{$destination}'",
+            default => null,
+        };
+
+        if ($command === null) {
+            $this->logger->error("Unsupported archive format: {$extension}");
+            return false;
         }
 
         $output = shell_exec($command . ' 2>&1');
@@ -363,14 +359,14 @@ class SystemService
         if (trim($exitCode) === '0') {
             $this->logger->info("Archive extracted successfully");
             return true;
-        } else {
-            $this->logger->error("Failed to extract archive", [
-                'command' => $command,
-                'output' => $output,
-                'exit_code' => $exitCode
-            ]);
-            return false;
         }
+
+        $this->logger->error("Failed to extract archive", [
+            'command' => $command,
+            'output' => $output,
+            'exit_code' => $exitCode
+        ]);
+        return false;
     }
 
     public function getSystemLoad(): array
@@ -395,7 +391,7 @@ class SystemService
         // Fallback method
         $uptime = shell_exec('cat /proc/uptime | cut -d" " -f1');
         if ($uptime) {
-            $seconds = (int)$uptime;
+            $seconds = (int) $uptime;
             $days = floor($seconds / 86400);
             $hours = floor(($seconds % 86400) / 3600);
             $minutes = floor(($seconds % 3600) / 60);

@@ -5,8 +5,8 @@ Thank you for your interest in contributing to OLS cPanel! This document provide
 ## Getting Started
 
 ### Prerequisites
-- PHP 7.4+ with required extensions
-- Node.js 18+ and npm
+- PHP 8.1+ with required extensions
+- Node.js 20+ and npm
 - Git
 - Basic knowledge of cPanel/WHM
 - Familiarity with OpenLiteSpeed

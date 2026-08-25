@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 // Mocked cPanel API service
-const api = axios.create({
+export const api = axios.create({
   baseURL: '/api', // This would normally point to your actual WHM plugin backend
   timeout: 5000
 })

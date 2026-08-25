@@ -233,19 +233,19 @@ class DomainService
     public function getDomainUser(string $domain): string
     {
         $domainObj = $this->getDomain($domain);
-        return $domainObj ? $domainObj->getUser() : 'nobody';
+        return $domainObj?->getUser() ?? 'nobody';
     }
 
     public function isDomainSuspended(string $domain): bool
     {
         $domainObj = $this->getDomain($domain);
-        return $domainObj ? $domainObj->isSuspended() : false;
+        return $domainObj?->isSuspended() ?? false;
     }
 
     public function getDomainIp(string $domain): string
     {
         $domainObj = $this->getDomain($domain);
-        return $domainObj ? $domainObj->getIp() : '127.0.0.1';
+        return $domainObj?->getIp() ?? '127.0.0.1';
     }
 
     public function getDomainPort(bool $ssl = false): int
@@ -310,11 +310,11 @@ class DomainService
             $errors[] = 'Domain contains invalid characters';
         }
 
-        if (strpos($domain, '..') !== false) {
+        if (str_contains($domain, '..')) {
             $errors[] = 'Domain cannot contain consecutive dots';
         }
 
-        if (substr($domain, -1) === '.' || substr($domain, 0, 1) === '.') {
+        if (str_ends_with($domain, '.') || str_starts_with($domain, '.')) {
             $errors[] = 'Domain cannot start or end with a dot';
         }
 

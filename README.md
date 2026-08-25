@@ -9,7 +9,7 @@ OLS cPanel is a **modern, comprehensive solution** for integrating OpenLiteSpeed
 ## 🚀 Features
 
 ### Core Features
-- **Modern Architecture**: Built with PHP 8+, Vue.js 3, and best practices
+- **Modern Architecture**: Built with PHP 8.1+, Vue.js 3, and best practices
 - **Automatic Installation**: One-click installation with rollback capability
 - **Real-time Configuration**: Live configuration updates without service restarts
 - **SSL Management**: Automated SSL certificate handling and renewal
@@ -42,7 +42,7 @@ OLS cPanel is a **modern, comprehensive solution** for integrating OpenLiteSpeed
   - Ubuntu 22.04 LTS
   - Ubuntu 24.04 LTS
   - Debian 12.x
-- **PHP**: Version 8.1 or higher (8.2+ recommended)
+- **PHP**: Version 8.1 or higher (8.3+ recommended)
 - **Memory**: 4GB RAM (8GB recommended)
 - **Storage**: 20GB free disk space (SSD recommended)
 
@@ -106,7 +106,7 @@ The main configuration file is located at `/etc/ols-cpanel/config.yaml`:
 ```yaml
 server:
   name: "OpenLiteSpeed"
-  version: "1.7.17"
+  version: "1.8.2"
   
 performance:
   max_connections: 10000
@@ -161,4 +161,4 @@ If you're upgrading from the old version, see our [Migration Guide](docs/migrati
 ---
 
 **OLS cPanel** - Modern OpenLiteSpeed integration for cPanel/WHM
-© 2024 OLS cPanel Team. All rights reserved.
+© 2026 OLS cPanel Team. All rights reserved.

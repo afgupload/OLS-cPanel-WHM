@@ -15,7 +15,7 @@ OLS cPanel is a modern OpenLiteSpeed integration for cPanel/WHM that replaces Ap
   - Ubuntu 22.04 LTS
   - Ubuntu 24.04 LTS
   - Debian 12.x
-- **PHP**: Version 8.1 or higher (8.2+ recommended)
+- **PHP**: Version 8.1 or higher (8.3+ recommended)
 - **Memory**: 4GB RAM (8GB recommended)
 - **Storage**: 20GB free disk space (SSD recommended)
 - **Root Access**: Required for installation
@@ -118,7 +118,7 @@ yum install -y curl wget unzip tar systemd which git
 curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 # Install Node.js (for frontend assets)
-curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -
+curl -fsSL https://rpm.nodesource.com/setup_20.x | bash -
 yum install -y nodejs
 ```
 
