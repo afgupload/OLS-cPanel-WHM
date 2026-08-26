@@ -1,7 +1,11 @@
 <<<<<<< ours
 <<<<<<< ours
 <<<<<<< ours
+<<<<<<< ours
 ﻿<?php
+=======
+<?php
+>>>>>>> theirs
 =======
 <?php
 >>>>>>> theirs
